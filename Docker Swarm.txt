@@ -1,0 +1,70 @@
+This is the first article since I started the DevOps journey. in this post, I have tried to explain how we can deploy an app using docker swarm.
+
+Docker Swarm:-
+
+ Docker Swarm is an orchestration(management) tool that is provided by docker to manage two or more Servers to reduce the unavailability of applications and make sure the application is up and ready all the time.
+It is an integral part of docker so no need to install docker swarm separately.
+In Docker swarm manager node is responsible for handling the worker nodes' resources efficiently and ensuring that the cluster operates efficiently.
+Components of Docker Swarm:-
+
+
+Manager Node:-   We can say the manager node is the main node from where we are going to manage tasks like services, allocating IPs, assigning tasks, and checking the health of worker nodes.
+Worker Node:- Worker nodes are the replicas of the manager node where we had deployed our application but the worker node doesn't have rights as of the manager.   Worker nodes perform the tasks of the running containers.
+Tasks:- They are the docker containers that execute commands.
+Services:-  Defines the tasks that needs to be execute on the manager and worker node.
+Why we need Docker Swarm:-
+
+Suppose in a docker container application is up and running and we know containerization can be seen by anyone within the team. now in case mistakenly they perform a kill command and the container gets deleted in this case our whole application is going to down. that's the reason we can not use Docker in production.
+
+Docker Swarm helps guarantee high service availability
+
+By implementing multiple managers, developers ensure that the system can continue to function even if one of the manager nodes fails.
+
+Benefits of Docker Swarm:- 
+
+Health Monitoring:- Docker swarm will ensure that all worker nodes are up and healthy in case any one node gets down then the manager node will auto-heal that worker node.
+Scaling:- Docker swarm will auto-scale based on the need of an application.
+Resource allocation & easy deployment.
+______________________________________________________________
+
+Steps to Deploy app using Docker Swarm:-
+
+As we know there will be one manager node and few worker nodes, so in this scenario we creating three EC2 instances with AWS.
+In those Three EC2 Instances one will be Manager node and other two will be Worker nodes.
+Now we have to install Docker engine with below command.
+..before that update ubuntu.
+                                         sudo apt-get update
+
+..Installing docker.
+                                         sudo apt-get install docker.io
+Once three instances are created then we have to assign one node as manager. We will use below command in any only one of the instance.
+..To make present server as Manager.
+                                       sudo docker swarm init
+
+..To check nodes use below command.
+                                       sudo docker node ls
+
+In the same way, we have to assign another node as worker, using the above token in the below command.
+..To make present
+
+docker swarm join --token SWMTKN-1-5zyvb95sufe88zb3kutdn917fptyzpwc2ce9au3mywsouougre-3q7anft9dyiqf9v9irl2ozgwy 172.31.15.31:2377
+Now again we can cross-verify whether nodes are added or not using the above node command. sudo docker node ls.
+in order to deploy the app we need one service in the docker swarm. Use the below command to do so.
+
+sudo docker service create --name Name_of_the_service --replicas No_of_replicas_we_needed --publish port:port image:tag
+
+
+.Explanation of above command
+--replicas :- here we have to give no of nodes which are in our docker swarm including manager node
+              in this case we use 3 ec2 instance including one manager so no of node will be 3
+
+--publish  :- here we have to give the port number where app is going to host e.g 8001:8001 (for react django app)
+
+image:tag  :-  image of the app which build from docker file and it's tag
+Example;
+
+sudo docker service create --name django-app-service --replicas 3 --publish 8001:8001 trainwithshubham/react-django-app:latest
+
+
+
+Now app is up and running you can check by opening public ip with respective applications port.
